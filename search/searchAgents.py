@@ -333,19 +333,19 @@ class CornersProblem(search.SearchProblem):
             hitsWall = self.walls[nextx][nexty]
 
             if hitsWall is not True:
-                # corns = [nextx == cor[0] and nexty == cor[1] for cor in self.corners]
-                # successors.append([dir, corns])
+                corns = [nextx == cor[0] and nexty == cor[1] for cor in self.corners]
+                successors.append([dir, corns])
                 equal = False
                 ind = 0
                 for corn in self.corners:
                     if(nextx == corn[0] and nexty == corn[1]):
                         corn_vals = state[1].copy()
                         corn_vals[ind] = True
-                        successors.append([(nextx, nexty), corn_vals])
+                        successors.append([(nextx, nexty), corn_vals, 1])
                         equal = True
                     ind = ind + 1
                 if equal is not True:
-                    successors.append([(nextx, nexty), state[1]])
+                    successors.append([(nextx, nexty), state[1], 1])
         
         # ipdb.set_trace()
 
@@ -382,8 +382,12 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    val = 0
+    for corn in corners:
+        # ipdb.set_trace()
+        val = max(val, util.manhattanDistance(state[0], corn))
+    return val
+    
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -476,8 +480,12 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    val = 0
+    for w in range(foodGrid.width):
+        for h in range(foodGrid.height):
+            if foodGrid[w][h] is True:
+                val = max(val, mazeDistance(position, (w, h), problem))
+    return val
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -507,8 +515,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.aStarSearch(AnyFoodSearchProblem(gameState))
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -543,8 +550,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
