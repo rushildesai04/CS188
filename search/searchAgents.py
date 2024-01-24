@@ -333,16 +333,21 @@ class CornersProblem(search.SearchProblem):
             hitsWall = self.walls[nextx][nexty]
 
             if hitsWall is not True:
-                corns = []
-                for dir in self.corners:
-                    if nextx == dir[0] and nexty == dir[1]:
-                        corns.append(True)
-                    else:
-                        corns.append(False)
-                
-                successors.append([dir, corns])
+                # corns = [nextx == cor[0] and nexty == cor[1] for cor in self.corners]
+                # successors.append([dir, corns])
+                equal = False
+                ind = 0
+                for corn in self.corners:
+                    if(nextx == corn[0] and nexty == corn[1]):
+                        corn_vals = state[1].copy()
+                        corn_vals[ind] = True
+                        successors.append([(nextx, nexty), corn_vals])
+                        equal = True
+                    ind = ind + 1
+                if equal is not True:
+                    successors.append([(nextx, nexty), state[1]])
         
-        ipdb.set_trace()
+        # ipdb.set_trace()
 
         self._expanded += 1 # DO NOT CHANGE
         return successors

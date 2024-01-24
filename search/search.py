@@ -18,7 +18,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-import ipdb
 
 class SearchProblem:
     """
