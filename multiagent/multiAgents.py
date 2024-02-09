@@ -18,6 +18,7 @@ import random, util
 
 from game import Agent
 from pacman import GameState
+import ipdb
 
 class ReflexAgent(Agent):
     """
@@ -160,48 +161,52 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
 
-        def maxValue(self, gameState, agent, depth):
+        def minNode(self, gameState, ind, layer):
+
+            best = 1000
+            actions = gameState.getLegalActions(ind)
+
+            for action in actions:
+                suc = gameState.generateSuccessor(ind, action)
+                deeper = minimax(self, suc, ind + 1, layer)
+                best = min(best, deeper)
+
+            return best
+
+        def maxNode(self, gameState, ind, layer):
             
-            bestValue = float("-inf")
+            nonlocal bestAction
+            best = -1000
+            actions = gameState.getLegalActions(ind)
 
-            for action in gameState.getLegalActions(agent):
-                successor = gameState.generateSuccessor(agent, action)
-                v = minimax(self, successor, agent + 1, depth)
-                bestValue = max(bestValue, v)
+            for action in actions:
+                suc = gameState.generateSuccessor(ind, action)
+                deeper = minimax(self, suc, ind + 1, layer)
+                best = max(best, deeper)
 
-                if depth == 1 and bestValue == v: 
-                    self.action = action
+                if layer == 1 and best == deeper: 
+                    bestAction = action
 
-            return bestValue
+            return best
 
-        def minValue(self, gameState, agent, depth):
+        def minimax(self, gameState, ind, layer):
 
-            bestValue = float("inf")
-
-            for action in gameState.getLegalActions(agent):
-                successor = gameState.generateSuccessor(agent, action)
-                v = minimax(self, successor, agent+1, depth)
-                bestValue = min(bestValue, v)
-
-            return bestValue
-
-        def minimax(self, gameState, agent, depth):
-
-            agent = agent % gameState.getNumAgents()
+            ind = ind % gameState.getNumAgents()
 
             if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
 
-            if agent == 0:
-                if depth < self.depth:
-                    return maxValue(self, gameState, agent, depth + 1)
+            if ind == 0:
+                if layer < self.depth:
+                    return maxNode(self, gameState, ind, layer + 1)
                 else:
                     return self.evaluationFunction(gameState)
             else:
-                return minValue(self, gameState, agent, depth)
-    
+                return minNode(self, gameState, ind, layer)
+
+        bestAction = ''
         minimax(self, gameState, 0, 0)
-        return self.action
+        return bestAction
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
