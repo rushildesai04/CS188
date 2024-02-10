@@ -196,13 +196,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
 
-            if ind == 0:
+            if not(ind == 0):
+                return minNode(self, gameState, ind, layer)
+            else:
                 if layer < self.depth:
                     return maxNode(self, gameState, ind, layer + 1)
                 else:
                     return self.evaluationFunction(gameState)
-            else:
-                return minNode(self, gameState, ind, layer)
 
         bestAction = ''
         minimax(self, gameState, 0, 0)
@@ -217,8 +217,59 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def minNode(self, gameState, ind, layer, alpha, beta):
+            best = 1000
+            actions = gameState.getLegalActions(ind)
+
+            for action in actions:
+                suc = gameState.generateSuccessor(ind, action)
+                deeper = alphabeta(self, suc, ind + 1, layer, alpha, beta)
+                best = min(best, deeper)
+                beta = min(beta, best)
+
+                if alpha > best: 
+                    return best
+
+            return best
+
+        def maxNode(self, gameState, ind, layer, alpha, beta):
+            nonlocal bestAction
+            best = -1000
+            actions = gameState.getLegalActions(ind)
+
+            for action in actions:
+                suc = gameState.generateSuccessor(ind, action)
+                deeper = alphabeta(self, suc, ind + 1, layer, alpha, beta)
+                best = max(best, deeper)
+                alpha = max(alpha, best)
+
+                if layer == 1 and best == deeper: 
+                    bestAction = action
+
+                if best > beta: 
+                    return best
+
+            return best
+
+        def alphabeta(self, gameState, ind, layer, alpha, beta):
+
+            ind = ind % gameState.getNumAgents()
+
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+
+            if not(ind == 0):
+                return minNode(self, gameState, ind, layer, alpha, beta)
+            else:
+                if layer < self.depth:
+                    return maxNode(self, gameState, ind, layer + 1, alpha, beta)
+                else:
+                    return self.evaluationFunction(gameState)
+        
+        bestAction = ''
+        alphabeta(self, gameState, 0, 0, -1000, 1000)
+        return bestAction
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
