@@ -391,9 +391,31 @@ def positionLogicPlan(problem) -> List:
     actions = [ 'North', 'South', 'East', 'West' ]
     KB = []
 
-    "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+
+    for i in range(50):
+        acts = []
+        positions = []
+
+        for action in DIRECTIONS:
+            acts.append(PropSymbolExpr(action, time=i))        
+
+        for x, y in non_wall_coords:
+            positions.append(PropSymbolExpr(pacman_str, x, y, time=i)) 
+
+        KB.append(exactlyOne(acts))
+        KB.append(exactlyOne(positions))
+
+        for x, y in non_wall_coords:
+                KB.append(pacmanSuccessorAxiomSingle(x, y, time=i+1, walls_grid=walls_grid))
+
+        goal = logic.PropSymbolExpr(pacman_str, xg, yg, time=i)
+        mod = findModel(goal & conjoin(KB))
+
+        if (mod):
+            return extractActionSequence(mod, actions)
+        
+    return None
 
 #______________________________________________________________________________
 # QUESTION 5
@@ -420,9 +442,46 @@ def foodLogicPlan(problem) -> List:
 
     KB = []
 
-    "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+
+    for x, y in food:
+        KB.append(PropSymbolExpr(food_str, x, y, time=0))
+
+    for i in range(50):
+        acts = []
+        positions = []
+        foodlist = []
+
+        for action in DIRECTIONS:
+            acts.append(PropSymbolExpr(action, time=i))        
+
+        for x, y in non_wall_coords:
+            positions.append(PropSymbolExpr(pacman_str, x, y, time=i)) 
+
+        KB.append(exactlyOne(acts))
+        KB.append(exactlyOne(positions))
+
+        for x, y in non_wall_coords:
+                    KB.append(pacmanSuccessorAxiomSingle(x, y, time=i+1, walls_grid=walls))
+        
+        for x, y in food:
+            foodlist.append(PropSymbolExpr(food_str, x, y, time=i))
+
+        for x, y in all_coords:
+            pos = PropSymbolExpr(pacman_str, x, y, time=i)
+            prev_food = PropSymbolExpr(food_str, x, y, time=i)
+            new_food = PropSymbolExpr(food_str, x, y, time=i+1)
+            state = (pos | ~prev_food) % ~new_food
+            KB.append(state)
+
+        goal = ~disjoin(foodlist)
+        mod = conjoin(goal, conjoin(KB))
+        mod = findModel(mod)
+
+        if (mod):
+            return extractActionSequence(mod, actions)
+
+    return None
 
 #______________________________________________________________________________
 # QUESTION 6
