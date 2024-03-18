@@ -23,7 +23,6 @@ import hunters
 from util import manhattanDistance, raiseNotDefined
 from factorOperations import joinFactorsByVariableWithCallTracking, joinFactors
 from factorOperations import eliminateWithCallTracking
-import ipdb
 
 ########### ########### ###########
 ########### QUESTION 1  ###########
