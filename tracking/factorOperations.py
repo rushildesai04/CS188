@@ -15,7 +15,6 @@ from typing import List
 from bayesNet import Factor
 import functools
 from util import raiseNotDefined
-import ipdb
 
 def joinFactorsByVariableWithCallTracking(callTrackingList=None):
 
