@@ -18,7 +18,6 @@ from util import raiseNotDefined
 
 def joinFactorsByVariableWithCallTracking(callTrackingList=None):
 
-
     def joinFactorsByVariable(factors: List[Factor], joinVariable: str):
         """
         Input factors is a list of factors.
