@@ -97,6 +97,7 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
+
         return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
@@ -115,6 +116,7 @@ class RegressionModel(object):
             if loss.data < 0.01:
                 break
 
+
 class DigitClassificationModel(object):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -130,8 +132,15 @@ class DigitClassificationModel(object):
     working on this part of the project.)
     """
     def __init__(self):
-        # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+
+        self.W1 = nn.Parameter(784,200)
+        self.b1 = nn.Parameter(1,200)
+
+        self.W2 = nn.Parameter(200,100)
+        self.b2 = nn.Parameter(1,100)
+
+        self.W3 = nn.Parameter(100,10)
+        self.b3 = nn.Parameter(1,10)
 
     def run(self, x):
         """
@@ -147,7 +156,13 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+
+        Z1 = nn.AddBias(nn.Linear(x, self.W1), self.b1)
+        A1 = nn.ReLU(Z1)
+        Z2 = nn.AddBias(nn.Linear(A1, self.W2), self.b2)
+        A2 = nn.ReLU(Z2)
+        Z3 = nn.AddBias(nn.Linear(A2, self.W3), self.b3)
+        return Z3
 
     def get_loss(self, x, y):
         """
@@ -162,13 +177,27 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+
+        while True:
+            for inp, res in dataset.iterate_once(100):
+                loss = self.get_loss(inp, res)
+                g_W1, g_b1, g_W2, g_b2, g_W3, g_b3 = nn.gradients(loss, [self.W1, self.b1, self.W2, self.b2, self.W3, self.b3])
+                self.W1.update(g_W1, -0.1)
+                self.b1.update(g_b1, -0.1)
+                self.W2.update(g_W2, -0.1)
+                self.b2.update(g_b2, -0.1)
+                self.W3.update(g_W3, -0.1)
+                self.b3.update(g_b3, -0.1)
+            if dataset.get_validation_accuracy() > 0.975:
+                break
+
 
 class LanguageIDModel(object):
     """
