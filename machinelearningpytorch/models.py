@@ -152,8 +152,9 @@ class RegressionModel(Module):
         """
         dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
         optimizer = optim.SGD(self.parameters(), lr=0.01)
-        for _ in range(100):
+        for ep in range(100):
             total_loss = 0
+            print(f"Epoch: [{ep + 1}/100]")
             for data in dataloader:
                 inp, res = data['x'], data['label']
                 optimizer.zero_grad()
@@ -180,11 +181,10 @@ class DigitClassificationModel(Module):
     working on this part of the project.)
     """
     def __init__(self):
-        # Initialize your model parameters here
-        super().__init__()
-        input_size = 28 * 28
-        output_size = 10
-        "*** YOUR CODE HERE ***"
+        super(DigitClassificationModel, self).__init__()
+        self.layer1 = Linear(784,200)
+        self.layer2 = Linear(200,100)
+        self.layer3 = Linear(100,10)
 
     def run(self, x):
         """
@@ -200,8 +200,14 @@ class DigitClassificationModel(Module):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        """ YOUR CODE HERE """
 
+        x = self.layer1(x)
+        x = relu(x)
+        x = self.layer2(x)
+        x = relu(x)
+        x = self.layer3(x)
+        return x
+        
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -215,16 +221,34 @@ class DigitClassificationModel(Module):
             y: a node with shape (batch_size x 10)
         Returns: a loss tensor
         """
-        """ YOUR CODE HERE """
 
-        
+        return cross_entropy(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        """ YOUR CODE HERE """
 
+        dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
+        optimizer = optim.SGD(self.parameters(), lr=0.01)
+
+        for ep in range(100):
+            correct = 0
+            total = 0
+            print(f"Epoch: [{ep + 1}/100]")
+            for data in dataloader:
+                inp, res = data['x'], data['label']
+                optimizer.zero_grad()
+                out = self.run(inp)
+                loss = self.get_loss(inp, res)
+                loss.backward()
+                optimizer.step()
+
+                total = total + res.size(0)
+                correct = correct + (out.data == res).sum().item()
+            acc = correct / total
+            if acc >= 0.975:
+                break
 
 
 class LanguageIDModel(Module):
